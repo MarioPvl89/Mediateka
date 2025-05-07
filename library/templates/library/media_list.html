@@ -1,0 +1,63 @@
+{% extends 'pages/base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2>Моя медиатека</h2>
+    <form method="get" class="mb-3 d-flex flex-wrap gap-2">
+        <select name="type" class="form-select w-auto">
+          <option value="">Все типы</option>
+          <option value="movie" {% if media_type == 'movie' %}selected{% endif %}>Фильмы</option>
+          <option value="series" {% if media_type == 'series' %}selected{% endif %}>Сериалы</option>
+          <option value="anime" {% if media_type == 'anime' %}selected{% endif %}>Аниме</option>
+          <option value="drama" {% if media_type == 'drama' %}selected{% endif %}>Дорамы</option>
+          <option value="other" {% if media_type == 'other' %}selected{% endif %}>Другое</option>
+        </select>
+      
+        <select name="sort" class="form-select w-auto">
+          <option value="">Сначала новые</option>
+          <option value="title" {% if sort == 'title' %}selected{% endif %}>По названию</option>
+          <option value="progress" {% if sort == 'progress' %}selected{% endif %}>По прогрессу</option>
+        </select>
+      
+        <button type="submit" class="btn btn-outline-primary">Применить</button>
+        <a href="{% url 'media-list' %}" class="btn btn-outline-secondary">Сбросить</a>
+      </form>
+    
+    <a href="{% url 'media-add' %}" class="btn btn-success mb-3">Добавить запись</a>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for item in media_items %}
+        <div class="col">
+          <div class="card h-100">
+            {% if item.cover_image %}
+              <img src="{{ item.cover_image.url }}" class="card-img-top" alt="{{ item.title }}">
+            {% else %}
+              <img src="{% static 'library/img/placeholder.png' %}" class="card-img-top" alt="Нет обложки">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ item.title }}</h5>
+              <p class="card-text">
+                Тип: {{ item.get_media_type_display }}<br>
+                Сезон: {{ item.seasons }}<br>
+                Эпизодов: {{ item.watched_episodes }}/{{ item.total_episodes }}<br>
+                Прогресс: {{ item.progress_percent }}%
+              </p>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+                <a href="{% url 'media-edit' item.id %}" class="btn btn-sm btn-primary">Редактировать</a>
+                <a href="{% url 'media-delete' item.id %}" class="btn btn-sm btn-danger"
+                   onclick="return confirm('Удалить запись &quot;{{ item.title }}&quot;?');">
+                  Удалить
+                </a>
+              </div>           
+            <div class="card-footer text-end">
+              <small class="text-muted">{{ item.added_at|date:"d.m.Y" }}</small>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p>Нет добавленных медиа.</p>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
